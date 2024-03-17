@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QTextEdit, QLabel, QDialog,
-                             QHBoxLayout, QGraphicsDropShadowEffect)
+                             QHBoxLayout, QGraphicsDropShadowEffect, QMessageBox)
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QIcon, QTextCursor, QPalette, QColor, QPixmap, QBrush
 
@@ -80,17 +80,33 @@ class ChatWindow(QWidget):
         self.sendButton.clicked.connect(self.send_message)
         self.messageText.returnPressed.connect(self.send_message)
 
+    def display_message(self, message, is_error=False):
+        # Save the current text color
+        original_color = self.chatText.textColor()
+
+        # If it's an error message, set the color to red
+        if is_error:
+            self.chatText.setTextColor(QColor(255, 0, 0))
+        
+        self.chatText.append(message)
+        
+        # Move the cursor to the end to ensure the view is scrolled to the latest message
+        self.chatText.moveCursor(QTextCursor.MoveOperation.End)
+        
+        # If it was an error, restore the original color
+        if is_error:
+            self.chatText.setTextColor(original_color)
+
     def send_message(self):
         message = self.messageText.text().strip()
-        if message:
+        if not message:
+            # Use the display_message method with the is_error flag set to True
+            self.display_message("Error: Cannot send an empty message. Please type something.", is_error=True)
+        else:
+            # The message is not an error, so we don't change the text color
             self.display_message(f"You: {message}")
             self.client.send(message.encode())
             self.messageText.clear()
-
-    def display_message(self, message):
-        self.chatText.append(message)
-        self.chatText.moveCursor(QTextCursor.MoveOperation.End)
-
 class UserNameDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -172,8 +188,40 @@ class UserNameDialog(QDialog):
         self.setLayout(layout)
 
         # Connect signals
-        self.okButton.clicked.connect(self.accept)
-        self.lineEdit.returnPressed.connect(self.accept)
+        self.okButton.clicked.connect(self.validate_username)
+        self.lineEdit.returnPressed.connect(self.validate_username)
+
+        self.default_style_sheet = """
+            QLineEdit {
+               background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
+               stop:0 rgba(255, 242, 216, 210), stop:1 rgba(229, 229, 229, 255));
+               color: #333333;
+               border: 2px solid #ffc088;
+               border-radius: 20px;
+               padding: 15px;
+            }
+        """
+        self.error_style_sheet = """
+            QLineEdit {
+               background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0,
+               stop:0 rgba(255, 242, 216, 210), stop:1 rgba(255, 229, 229, 255));
+               color: #333333;
+               border: 2px solid red;
+               border-radius: 20px;
+               padding: 15px;
+            }
+        """
+        self.lineEdit.setStyleSheet(self.default_style_sheet)
+        
+
+
+    def validate_username(self):
+        username = self.getUserName()
+        if len(username) >= 3 and len(username) <= 14 and username.isalnum():
+            self.lineEdit.setStyleSheet(self.default_style_sheet)
+            self.accept()
+        else:
+            self.lineEdit.setStyleSheet(self.error_style_sheet)
 
     def getUserName(self):
         return self.lineEdit.text().strip()

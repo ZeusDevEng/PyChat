@@ -34,7 +34,7 @@ class Client:
                 message = self.client.recv(1024).decode()  # Receive and decode the message
                 chat_window.display_message(message)  # Display the received message in the chat window
             except Exception as e:
-                print(f"An error occurred: {e}")  # Print any exceptions that occur
+                print(f"An error occurred: {e}  Connection lost to the server.")  # Print any exceptions that occur
                 self.client.close()  # Close the client socket
                 break  # Exit the loop
 
