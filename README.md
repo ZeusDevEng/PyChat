@@ -11,6 +11,7 @@ Before you get started, ensure you have the following installed on your machine:
  -   🐍 Python 3.x
 ## 🛠 Installation
 Follow these steps to get your environment ready:
+
 **1. Create a Python virtual environment:**
 
     python3 -m venv EnvironmentName
