@@ -14,7 +14,7 @@ Follow these steps to get your environment ready:
 **1. Create a Python virtual environment:**
 
     python3 -m venv EnvironmentName
-   **2. Activate the virtual environment:**
+**2. Activate the virtual environment:**
     On Windows:
 
     .\EnvironmentName\Scripts\activate
